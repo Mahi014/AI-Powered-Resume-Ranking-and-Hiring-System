@@ -1,12 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/auth/google";
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="p-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-gray-800">AI-Powered Resume Ranking and Hiring System</h1>
+        <h1 className="text-xl font-bold text-gray-800">
+          AI-Powered Resume Ranking and Hiring System
+        </h1>
       </header>
 
       {/* Main Content */}
@@ -18,13 +23,13 @@ const LandingPage = () => {
           <p className="text-gray-600 text-center mb-6">
             Automatically analyze and rank job applicant resumes with AI
           </p>
-          
-          <Link
-            to="/login"
+
+          <button
+            onClick={handleGoogleLogin}
             className="block w-full p-3 bg-blue-500 hover:bg-blue-600 text-white text-center rounded-md transition"
           >
             Continue with Google
-          </Link>
+          </button>
         </div>
       </main>
 

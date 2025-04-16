@@ -20,7 +20,7 @@ passport.use(new GoogleStrategy({
     
     if (result.rows.length === 0) {
         // If not, create a new user
-        await pool.query("INSERT INTO login (email, google_id,role) VALUES ($1, $2,$3)", [email, id,null]);
+        await pool.query("INSERT INTO login (email, google_id,role) VALUES ($1, $2,$3)", [email, id,"none"]);
     }
 
     return done(null, { email, google_id: id });

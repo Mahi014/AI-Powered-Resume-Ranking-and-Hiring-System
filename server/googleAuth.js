@@ -15,11 +15,11 @@ passport.use(new GoogleStrategy({
     const email = profile._json.email; 
     const id = profile.id;
 
-    // Check if the user exists in the database
+
     const result = await pool.query("SELECT * FROM login WHERE google_id = $1", [id]);
     
     if (result.rows.length === 0) {
-        // If not, create a new user
+        
         await pool.query("INSERT INTO login (email, google_id,role) VALUES ($1, $2,$3)", [email, id,"none"]);
     }
 
@@ -37,12 +37,12 @@ passport.deserializeUser(async (email, done) => {
 
 // Google OAuth Routes
 export const googleAuthRoutes = (app) => {
-    // Initiate Google OAuth login
+    
     app.get("/auth/google", passport.authenticate("google", {
         scope: ["email"]
     }));
 
-    // Callback route where Google will send the user after authentication
+    // after authentication route
     app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "http://localhost:3000" }), (req, res) => {
         res.redirect("http://localhost:3000/choose-role"); 
     });

@@ -1,7 +1,7 @@
 import pool from "../db.js";
 import multer from "multer";
 
-// Memory storage for direct database insert
+// pdf storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,

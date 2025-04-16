@@ -44,7 +44,7 @@ const FindJob = () => {
 
       const data = await res.json();
       if (data.success) {
-        fetchJobs(); // Refresh list
+        fetchJobs(); 
       } else {
         alert(data.message);
       }

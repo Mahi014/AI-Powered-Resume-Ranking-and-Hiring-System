@@ -1,0 +1,26 @@
+# Node.js
+client/node_modules/
+server/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Client build artifacts
+client/build/
+client/.env
+
+# Server build artifacts
+server/build/
+server/.env
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

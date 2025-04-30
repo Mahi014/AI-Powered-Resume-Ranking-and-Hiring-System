@@ -46,12 +46,4 @@ export const googleAuthRoutes = (app) => {
     app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "http://localhost:3000" }), (req, res) => {
         res.redirect("http://localhost:3000/choose-role"); 
     });
-
-    // Logout Route
-    app.get("/logout", (req, res) => {
-        req.logout((err) => {
-            if (err) return next(err);
-            res.json({ success: true });
-        });
-    });
 };

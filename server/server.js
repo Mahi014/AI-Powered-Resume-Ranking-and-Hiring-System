@@ -9,6 +9,7 @@ import { employerRoutes } from "./routes/employerRoutes.js";
 import { jobRoutes } from "./routes/jobRoutes.js";
 import { googleAuthRoutes} from "./googleAuth.js";
 import { isLoggedIn } from "./middleware/isLoggedIn.js";
+import { logoutRoutes } from "./routes/logoutRoutes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(passport.session());
 // Routes
 googleAuthRoutes(app);
 authRoutes(app);
+logoutRoutes(app);
 roleRoutes(app, isLoggedIn);
 jobSeekerRoutes(app, isLoggedIn);
 employerRoutes(app, isLoggedIn);

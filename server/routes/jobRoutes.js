@@ -29,7 +29,22 @@ export const jobRoutes = (app, isLoggedIn) => {
             res.json({ "Success": "false" });
         }
     });
-
+    // Delete Job
+    app.delete("/job/:job_id", isLoggedIn, async (req, res) => {
+      try {
+        const employer_id = req.user.id;
+        const { job_id } = req.params;
+        // Delete related applications first (foreign key constraint)
+        await pool.query("DELETE FROM job_applied WHERE job_id = $1", [job_id]);
+        // Delete the job
+        await pool.query("DELETE FROM job_description WHERE job_id = $1", [job_id]);
+        res.json({ success: true, message: "Job deleted successfully" });
+      } catch (err) {
+        console.error("Delete job error:", err.message);
+        res.status(500).json({ success: false, message: "Failed to delete job" });
+      }
+    });
+    
     // Job apply
     app.post("/job-apply", isLoggedIn, async (req, res) => {
         try {

@@ -6,6 +6,7 @@ const EmployerProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Logout handler
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
@@ -24,6 +25,7 @@ const EmployerProfile = () => {
     }
   };
 
+  // Fetch employer profile
   useEffect(() => {
     let isMounted = true;
 
@@ -32,7 +34,6 @@ const EmployerProfile = () => {
         const res = await fetch("http://localhost:5000/employer-profile", {
           credentials: "include",
         });
-
         const data = await res.json();
 
         if (!data.exists && isMounted) {
@@ -54,6 +55,33 @@ const EmployerProfile = () => {
     };
   }, [navigate]);
 
+  // Delete job handler
+  const handleDeleteJob = async (job_id, job_title) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${job_title}"?`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/job/${job_id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Job deleted successfully!");
+        setProfile((prev) => ({
+          ...prev,
+          jobs: prev.jobs.filter((job) => job.job_id !== job_id),
+        }));
+      } else {
+        alert(data.message || "Failed to delete job.");
+      }
+    } catch (err) {
+      console.error("Error deleting job:", err);
+      alert("Something went wrong while deleting the job.");
+    }
+  };
+
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (!profile) return <div className="text-center mt-10">Failed to load profile.</div>;
 
@@ -67,13 +95,13 @@ const EmployerProfile = () => {
             onClick={() => navigate("/add-job")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
           >
-            🔨 Add Job
+            Add Job
           </button>
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
       </header>
@@ -84,9 +112,15 @@ const EmployerProfile = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-4">
             Employer Profile
           </h1>
-          <p className="text-gray-700 mb-2"><strong>Name:</strong> {profile.name}</p>
-          <p className="text-gray-700 mb-2"><strong>Company:</strong> {profile.company}</p>
-          <p className="text-gray-700 mb-6"><strong>Post:</strong> {profile.post}</p>
+          <p className="text-gray-700 mb-2">
+            <strong>Name:</strong> {profile.name}
+          </p>
+          <p className="text-gray-700 mb-2">
+            <strong>Company:</strong> {profile.company}
+          </p>
+          <p className="text-gray-700 mb-6">
+            <strong>Post:</strong> {profile.post}
+          </p>
 
           <h2 className="text-xl font-semibold text-blue-600 mb-4">
             Jobs You Have Created
@@ -94,13 +128,35 @@ const EmployerProfile = () => {
 
           {Array.isArray(profile.jobs) && profile.jobs.length > 0 ? (
             <ul className="space-y-4">
-              {profile.jobs.map(job => (
-                <li key={job.job_id} className="p-4 border rounded-md shadow-sm bg-gray-50">
-                  <h3 className="text-lg font-semibold text-gray-800">{job.job_title}</h3>
+              {profile.jobs.map((job) => (
+                <li
+                  key={job.job_id}
+                  className="p-4 border rounded-md shadow-sm bg-gray-50"
+                >
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {job.job_title}
+                  </h3>
                   <p className="text-gray-600 mb-1">{job.job_description}</p>
                   <span className="inline-block text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
                     Role: {job.job_role}
                   </span>
+
+                  {/* Buttons */}
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      onClick={() => navigate(`/job/${job.job_id}/applicants`)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition"
+                    >
+                      Show Applicants
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteJob(job.job_id, job.job_title)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

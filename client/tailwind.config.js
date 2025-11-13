@@ -9,7 +9,8 @@ export default {
     "./src/components/FindJob.jsx",
     "./src/components/EmployerProfile.jsx",
     "./src/components/JobSeekerProfile.jsx",
-    "./src/components/JobCard.jsx",],
+    "./src/components/JobCard.jsx",
+    "./src/components/ShowApplicants.jsx"],
   theme: {
     extend: {},
   },

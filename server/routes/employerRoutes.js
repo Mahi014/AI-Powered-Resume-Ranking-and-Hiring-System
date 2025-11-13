@@ -72,4 +72,56 @@ export const employerRoutes = (app, isLoggedIn) => {
           res.status(500).json({ exists: false });
         }
     });
+
+    // Get all applicants for a specific job
+    app.get("/job/:job_id/applicants", isLoggedIn, async (req, res) => {
+      const { job_id } = req.params;
+      try {
+        const query = `
+          SELECT 
+            js.job_seeker_id,
+            js.name,
+            js.college,
+            js.degree,
+            js.graduation_year,
+            js.resume_name
+          FROM job_applied ja
+          JOIN job_seeker js ON ja.job_seeker_id = js.job_seeker_id
+          WHERE ja.job_id = $1
+        `;
+
+        const result = await pool.query(query, [job_id]);
+
+        res.json({
+          success: true,
+          applicants: result.rows,
+        });
+      } catch (err) {
+        console.error("Error fetching applicants:", err.message);
+        res.status(500).json({ success: false, error: "Internal Server Error" });
+      }
+    });
+
+    // Preview a specific applicant's resume 
+    app.get("/resume/:job_seeker_id", isLoggedIn, async (req, res) => {
+      const { job_seeker_id } = req.params;
+      try {
+        const result = await pool.query(
+          "SELECT resume_name, resume_data FROM job_seeker WHERE job_seeker_id = $1",
+          [job_seeker_id]
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).send("Resume not found.");
+        }
+        const { resume_name, resume_data } = result.rows[0];
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename="${resume_name}"`);
+        res.send(resume_data);
+      } catch (err) {
+        console.error("Error fetching resume:", err.message);
+        res.status(500).send("Error retrieving resume.");
+      }
+    });
+
 };

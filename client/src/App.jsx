@@ -7,6 +7,7 @@ import AddJob from "./components/AddJob";
 import FindJob from "./components/FindJob";
 import EmployerProfile from "./components/EmployerProfile";
 import JobSeekerProfile from "./components/JobSeekerProfile";
+import ShowApplicants from "./components/ShowApplicants";
 import {
   BrowserRouter as Router,
   Routes,
@@ -104,7 +105,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-      
+        <Route
+          path="/job/:job_id/applicants"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <ShowApplicants />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

@@ -12,7 +12,6 @@ export const jobRoutes = (app, isLoggedIn) => {
             res.status(500).json({ error: err.message });
         }
     });
-
     // Add job
     app.post("/add-job", isLoggedIn, async (req, res) => {
         try {
@@ -71,4 +70,23 @@ export const jobRoutes = (app, isLoggedIn) => {
           res.status(500).json({ success: false, message: "Something went wrong." });
         }
     });
+
+    // Get job details
+    app.get("/job/:job_id", isLoggedIn, async (req, res) => {
+      const { job_id } = req.params;
+      try {
+        const result = await pool.query(
+          "SELECT job_title, job_description, job_role FROM job_description WHERE job_id = $1",
+          [job_id]
+        );
+        if (result.rows.length === 0) {
+          return res.json({ success: false, message: "Job not found" });
+        }
+        res.json({ success: true, job: result.rows[0] });
+      } catch (err) {
+        console.error("Error fetching job details:", err.message);
+        res.status(500).json({ success: false });
+      }
+    });
+
 };

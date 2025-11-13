@@ -66,13 +66,13 @@ const JobSeekerProfile = () => {
             onClick={() => navigate("/find-job")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
           >
-            🔍 Find Jobs
+            Find Jobs
           </button>
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
       </header>

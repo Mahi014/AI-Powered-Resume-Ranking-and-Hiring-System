@@ -5,32 +5,37 @@ const ShowApplicants = () => {
   const { job_id } = useParams();
   const navigate = useNavigate();
   const [applicants, setApplicants] = useState([]);
+  const [jobDetails, setJobDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchApplicants = async () => {
+    const fetchApplicantsAndJob = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/job/${job_id}/applicants`, {
-          credentials: "include",
-        });
-        const data = await res.json();
+        const [appRes, jobRes] = await Promise.all([
+          fetch(`http://localhost:5000/job/${job_id}/applicants`, {
+            credentials: "include",
+          }),
+          fetch(`http://localhost:5000/job/${job_id}`, {
+            credentials: "include",
+          }),
+        ]);
 
-        if (data.success) {
-          setApplicants(data.applicants);
-        } else {
-          console.error("Failed to fetch applicants");
-        }
+        const appData = await appRes.json();
+        const jobData = await jobRes.json();
+
+        if (appData.success) setApplicants(appData.applicants);
+        if (jobData.success) setJobDetails(jobData.job);
       } catch (err) {
-        console.error("Error fetching applicants:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchApplicants();
+    fetchApplicantsAndJob();
   }, [job_id]);
 
-  if (loading) return <div className="text-center mt-10">Loading applicants...</div>;
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -45,9 +50,25 @@ const ShowApplicants = () => {
         </button>
       </header>
 
-      {/* Main content with extra top spacing */}
-      <main className="flex-1 px-4 sm:px-6 py-10"> {/* increased top padding */}
-        <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
+      {/* Main content */}
+      <main className="flex-1 px-4 sm:px-6 py-10">
+        <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-6">
+          {/* Job details */}
+          {jobDetails ? (
+            <div className="border-b pb-4">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {jobDetails.job_title}
+              </h2>
+              <p className="text-gray-700 mt-2">
+                <strong>Role:</strong> {jobDetails.job_role}
+              </p>
+              <p className="text-gray-600 mt-1">{jobDetails.job_description}</p>
+            </div>
+          ) : (
+            <p className="text-gray-600 text-center">Job details not found.</p>
+          )}
+
+          {/* Applicants list */}
           {applicants.length > 0 ? (
             <ul className="space-y-5">
               {applicants.map((applicant) => (

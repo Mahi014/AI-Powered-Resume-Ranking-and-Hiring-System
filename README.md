@@ -5,12 +5,13 @@ A full-stack web application to simplify the hiring process. Employers can post 
 ## Tech Stack
 
 - **Frontend:** React, Tailwind CSS  
-- **Backend:** Node.js, Express.js  
+- **Backend:** Node.js, Express.js, FastAPI  
 - **Database:** PostgreSQL
 
-## Features (In Progress)
+## Features
 
 - [x] Employer profile & job posting  
 - [x] Job seeker profile with resume upload  
 - [x] Apply to jobs with auto-submitted resume  
-- [ ] AI-based resume ranking (Coming Soon)
+- [x] Smart resume ranking system
+

@@ -4,6 +4,9 @@ server/node_modules/
 npm-debug.log
 yarn-error.log
 
+#FASTAPI
+ranking_server/app/__pycache__
+
 # Client build artifacts
 client/build/
 client/.env
@@ -11,6 +14,7 @@ client/.env
 # Server build artifacts
 server/build/
 server/.env
+ranking_server/.env
 
 # Logs
 *.log

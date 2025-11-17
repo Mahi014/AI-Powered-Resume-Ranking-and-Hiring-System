@@ -84,10 +84,12 @@ export const employerRoutes = (app, isLoggedIn) => {
             js.college,
             js.degree,
             js.graduation_year,
-            js.resume_name
+            js.resume_name,
+            ja.rank
           FROM job_applied ja
           JOIN job_seeker js ON ja.job_seeker_id = js.job_seeker_id
           WHERE ja.job_id = $1
+          ORDER BY ja.rank ASC NULLS LAST, js.name;
         `;
 
         const result = await pool.query(query, [job_id]);

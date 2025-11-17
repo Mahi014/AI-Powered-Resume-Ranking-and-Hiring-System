@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+psycopg2-binary
+numpy
+scikit-learn
+pandas
+nltk
+python-docx
+pdfminer.six
+pandas 
+xlsxwriter

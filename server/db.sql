@@ -34,4 +34,5 @@ CREATE TABLE job_applied (
     id SERIAL PRIMARY KEY,
     job_id INTEGER REFERENCES job_description(job_id),
     job_seeker_id INTEGER REFERENCES job_seeker(job_seeker_id)
+    rank INTEGER DEFAULT 0
 );

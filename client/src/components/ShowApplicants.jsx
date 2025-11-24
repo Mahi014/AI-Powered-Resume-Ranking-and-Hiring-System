@@ -12,6 +12,7 @@ const ShowApplicants = () => {
 
   useEffect(() => {
     fetchApplicantsAndJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job_id]);
 
   const fetchApplicantsAndJob = async () => {
@@ -26,7 +27,12 @@ const ShowApplicants = () => {
       const jobData = await jobRes.json();
 
       if (appData.success && Array.isArray(appData.applicants)) {
-        setApplicants(appData.applicants);
+        // normalize status to lowercase and fallback to applied
+        const normalized = appData.applicants.map((a) => ({
+          ...a,
+          status: a.status ? a.status.toLowerCase() : "applied",
+        }));
+        setApplicants(normalized);
       } else {
         setApplicants([]);
       }
@@ -75,8 +81,9 @@ const ShowApplicants = () => {
       if (data && data.success) {
         const topCount = data.ranked_count ?? 0;
         const topPreview = Array.isArray(data.top) ? data.top.slice(0, 3) : [];
-        const previewStr = topPreview.map(t => `${t.job_seeker_id}(rank:${t.rank ?? "-"})`).join(", ");
-        // Refresh applicants to pick up updated ja.rank
+        const previewStr = topPreview
+          .map((t) => `${t.job_seeker_id}(rank:${t.rank ?? "-"})`)
+          .join(", ");
         await fetchApplicantsAndJob();
         alert(`Ranking finished. Ranked ${topCount} applicants. Top: ${previewStr || "N/A"}`);
       } else {
@@ -141,6 +148,43 @@ const ShowApplicants = () => {
     }
   };
 
+  const handleStatusChange = async (application_id, newStatus) => {
+    try {
+      // optimistic update: update UI immediately
+      setApplicants((prev) =>
+        prev.map((a) =>
+          a.application_id === application_id ? { ...a, status: newStatus } : a
+        )
+      );
+
+      const res = await fetch(
+        `http://localhost:5000/applications/${application_id}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      const data = await res.json();
+      if (!data.success) {
+        // revert (reload) on failure
+        await fetchApplicantsAndJob();
+        alert(data.message || "Failed to update status");
+        return;
+      }
+
+      // success already applied to local state; optionally refresh server state
+      // await fetchApplicantsAndJob();
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      alert("Error updating status. Check console/logs.");
+      // revert on error
+      await fetchApplicantsAndJob();
+    }
+  };
+
   if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
@@ -161,7 +205,9 @@ const ShowApplicants = () => {
           <button
             onClick={rankResumes}
             disabled={ranking}
-            className={`mr-3 ${ranking ? "bg-gray-400 hover:bg-gray-400" : "bg-green-600 hover:bg-green-700"} text-white px-4 py-2 rounded-md transition`}
+            className={`mr-3 ${
+              ranking ? "bg-gray-400 hover:bg-gray-400" : "bg-green-600 hover:bg-green-700"
+            } text-white px-4 py-2 rounded-md transition`}
           >
             {ranking ? "Ranking..." : "Rank Resumes"}
           </button>
@@ -200,11 +246,16 @@ const ShowApplicants = () => {
                   className="p-5 border rounded-md shadow-sm bg-gray-50 flex justify-between items-start"
                 >
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{applicant.name}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {applicant.name}
+                    </h3>
                     <p className="text-gray-600">
-                      🎓 {applicant.degree || "—"} {applicant.college ? `from ${applicant.college}` : ""}
+                      🎓 {applicant.degree || "—"}{" "}
+                      {applicant.college ? `from ${applicant.college}` : ""}
                     </p>
-                    <p className="text-gray-600">📅 Graduation Year: {applicant.graduation_year || "—"}</p>
+                    <p className="text-gray-600">
+                      📅 Graduation Year: {applicant.graduation_year || "—"}
+                    </p>
                     <a
                       href={`http://localhost:5000/resume/${applicant.job_seeker_id}`}
                       target="_blank"
@@ -215,17 +266,46 @@ const ShowApplicants = () => {
                     </a>
                   </div>
 
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">Rank</div>
-                    <div className="mt-1 text-2xl font-bold text-gray-800">
-                      {applicant.rank && applicant.rank > 0 ? applicant.rank : <span className="text-gray-400">Not ranked</span>}
+                  <div className="text-right space-y-2">
+                    <div>
+                      <div className="text-sm text-gray-500 mb-1">Rank</div>
+                      <div className="mt-1 text-2xl font-bold text-gray-800">
+                        {applicant.rank && applicant.rank > 0 ? (
+                          applicant.rank
+                        ) : (
+                          <span className="text-gray-400">Not ranked</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status dropdown */}
+                    <div className="mt-3">
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Status
+                      </label>
+                      <select
+                        value={applicant.status || "applied"}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            applicant.application_id,
+                            e.target.value
+                          )
+                        }
+                        className="border rounded-md px-2 py-1 text-sm"
+                      >
+                        <option value="applied">Applied</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="selected">Selected</option>
+                      </select>
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-600 text-center">No applicants for this job yet.</p>
+            <p className="text-gray-600 text-center">
+              No applicants for this job yet.
+            </p>
           )}
         </div>
       </main>
@@ -237,13 +317,31 @@ const ShowApplicants = () => {
           <div className="relative bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center space-x-4">
               {/* spinner */}
-              <svg className="animate-spin h-10 w-10 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              <svg
+                className="animate-spin h-10 w-10 text-green-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
               </svg>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">Ranking in progress</h3>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Ranking in progress
+                </h3>
                 <p className="text-sm text-gray-600 mt-1">{rankingMsg}</p>
               </div>
             </div>

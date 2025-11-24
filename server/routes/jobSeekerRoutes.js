@@ -43,54 +43,73 @@ export const jobSeekerRoutes = (app, isLoggedIn) => {
 
     // Job seeker profile
     app.get("/job-seeker-profile", isLoggedIn, async (req, res) => {
-        const id = req.user.id;
-    
-        try {
-          const check = await pool.query(
-            "SELECT * FROM job_seeker WHERE job_seeker_id = $1",
-            [id]
-          );
-    
-          if (check.rows.length === 0) {
-            return res.json({ exists: false });
-          }
-    
-          const result = await pool.query(
-            "SELECT js.name, js.college, js.degree, js.graduation_year, js.resume_name, js.resume_data, ja.id AS application_id, jd.job_id, jd.job_title, jd.job_description, jd.job_role FROM job_seeker js LEFT JOIN job_applied ja ON js.job_seeker_id = ja.job_seeker_id LEFT JOIN job_description jd ON ja.job_id = jd.job_id WHERE js.job_seeker_id = $1",
-            [id]
-          );
-    
-          const rows = result.rows;
-          const { name, college, degree, graduation_year, resume_name, resume_data } = rows[0];
-    
-          const jobs = rows
-            .filter(row => row.job_id !== null)
-            .map(({ application_id, job_id, job_title, job_description, job_role }) => ({
-              application_id,
-              job_id,
-              job_title,
-              job_description,
-              job_role
-            }));
-    
-          res.json({
-            exists: true,
-            data: {
-              name,
-              college,
-              degree,
-              graduation_year,
-              resume_name,
-              resume_data,
-              jobs
-            }
-          });
-        } catch (err) {
-          console.error("Job Seeker Profile Error:", err.message);
-          res.status(500).json({ error: "Internal Server Error" });
-        }
-    });
+      const id = req.user.id;
 
+      try {
+        const check = await pool.query(
+          "SELECT * FROM job_seeker WHERE job_seeker_id = $1",
+          [id]
+        );
+
+        if (check.rows.length === 0) {
+          return res.json({ exists: false });
+        }
+
+        const result = await pool.query(
+          `SELECT
+            js.name,
+            js.college,
+            js.degree,
+            js.graduation_year,
+            js.resume_name,
+            js.resume_data,
+            ja.id AS application_id,
+            ja.status AS application_status,
+            jd.job_id,
+            jd.job_title,
+            jd.job_description,
+            jd.job_role
+          FROM job_seeker js
+          LEFT JOIN job_applied ja ON js.job_seeker_id = ja.job_seeker_id
+          LEFT JOIN job_description jd ON ja.job_id = jd.job_id
+          WHERE js.job_seeker_id = $1`,
+          [id]
+        );
+
+        const rows = result.rows;
+        // rows[0] exists because job_seeker exists (LEFT JOIN yields at least one row)
+        const { name, college, degree, graduation_year, resume_name, resume_data } = rows[0];
+
+        const jobs = rows
+          .filter(row => row.job_id !== null)
+          .map(({ application_id, job_id, job_title, job_description, job_role, application_status }) => ({
+            application_id,
+            job_id,
+            job_title,
+            job_description,
+            job_role,
+            // keep DB as-is but provide a safe default
+            status: application_status ? application_status.toLowerCase() : "applied"
+          }));
+
+        res.json({
+          exists: true,
+          data: {
+            name,
+            college,
+            degree,
+            graduation_year,
+            resume_name,
+            resume_data,
+            jobs
+          }
+        });
+      } catch (err) {
+        console.error("Job Seeker Profile Error:", err.message);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+    
     // Check if job seeker exists
     app.get("/check/job-seeker", isLoggedIn, async (req, res) => {
         try {

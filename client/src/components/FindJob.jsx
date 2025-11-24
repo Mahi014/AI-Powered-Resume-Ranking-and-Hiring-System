@@ -12,17 +12,32 @@ const FindJob = () => {
       const res = await fetch("http://localhost:5000/find-job", {
         credentials: "include",
       });
+      if (!res.ok) throw new Error("Failed to fetch jobs");
       const allJobs = await res.json();
 
+      // fetch profile to know applied jobs + statuses
       const resApplied = await fetch("http://localhost:5000/job-seeker-profile", {
         credentials: "include",
       });
-      const profile = await resApplied.json();
-      const appliedJobIds = profile.data.jobs.map((j) => j.job_id);
+
+      let appliedJobs = [];
+      if (resApplied.ok) {
+        const profile = await resApplied.json();
+        if (profile.exists && Array.isArray(profile.data.jobs)) {
+          appliedJobs = profile.data.jobs; // each job has job_id and status
+        }
+      }
+
+      // create a map job_id -> status
+      const statusMap = {};
+      appliedJobs.forEach((j) => {
+        statusMap[j.job_id] = j.status ? j.status.toLowerCase() : "applied";
+      });
 
       const jobsWithStatus = allJobs.map((job) => ({
         ...job,
-        applied: appliedJobIds.includes(job.job_id),
+        applied: !!statusMap[job.job_id],
+        status: statusMap[job.job_id] || null,
       }));
 
       setJobs(jobsWithStatus);
@@ -44,14 +59,17 @@ const FindJob = () => {
 
       const data = await res.json();
       if (data.success) {
-        fetchJobs(); 
+        // re-fetch jobs to update applied/status
+        fetchJobs();
       } else {
-        alert(data.message);
+        alert(data.message || "Could not apply");
       }
     } catch (err) {
       console.error("Apply failed:", err.message);
+      alert("Apply failed. Check console for details.");
     }
   };
+
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
@@ -72,6 +90,7 @@ const FindJob = () => {
 
   useEffect(() => {
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
@@ -101,9 +120,7 @@ const FindJob = () => {
       <div className="pt-20 p-6 max-w-4xl mx-auto space-y-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Available Jobs</h2>
         {jobs.length > 0 ? (
-          jobs.map((job) => (
-            <JobCard key={job.job_id} job={job} onApply={handleApply} />
-          ))
+          jobs.map((job) => <JobCard key={job.job_id} job={job} onApply={handleApply} />)
         ) : (
           <div className="text-gray-600 italic">No jobs available.</div>
         )}

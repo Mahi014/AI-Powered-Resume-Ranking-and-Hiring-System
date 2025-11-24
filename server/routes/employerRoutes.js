@@ -85,7 +85,9 @@ export const employerRoutes = (app, isLoggedIn) => {
             js.degree,
             js.graduation_year,
             js.resume_name,
-            ja.rank
+            ja.rank,
+            ja.id AS application_id,
+            ja.status
           FROM job_applied ja
           JOIN job_seeker js ON ja.job_seeker_id = js.job_seeker_id
           WHERE ja.job_id = $1
@@ -123,6 +125,34 @@ export const employerRoutes = (app, isLoggedIn) => {
       } catch (err) {
         console.error("Error fetching resume:", err.message);
         res.status(500).send("Error retrieving resume.");
+      }
+    });
+
+    //update applicant status
+    app.patch("/applications/:application_id/status", isLoggedIn, async (req, res) => {
+      const { application_id } = req.params;
+      const { status } = req.body;
+
+      // Allowed statuses controlled by your app logic
+      const allowed = ["applied", "rejected", "selected"];
+      if (!allowed.includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status" });
+      }
+
+      try {
+        const result = await pool.query(
+          "UPDATE job_applied SET status = $1 WHERE id = $2 RETURNING id, status",
+          [status, application_id]
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({ success: false, message: "Application not found" });
+        }
+
+        res.json({ success: true, application: result.rows[0] });
+      } catch (err) {
+        console.error("Error updating status:", err.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
       }
     });
 

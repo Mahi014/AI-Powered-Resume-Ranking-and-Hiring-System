@@ -1,6 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const statusBadgeClass = (status) => {
+  switch ((status || "applied").toLowerCase()) {
+    case "rejected":
+      return "text-red-700 bg-red-100";
+    case "selected":
+      return "text-blue-800 bg-blue-100";
+    case "applied":
+    default:
+      return "text-green-800 bg-green-100";
+  }
+};
+
+const humanStatus = (status) => {
+  if (!status) return "Applied";
+  const s = status.replace(/_/g, " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
 const JobSeekerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -80,9 +98,7 @@ const JobSeekerProfile = () => {
       {/* Main Content */}
       <main className="pt-28 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Job Seeker Profile
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Job Seeker Profile</h1>
 
           <p className="text-gray-700 mb-2"><strong>Name:</strong> {profile.name}</p>
           <p className="text-gray-700 mb-2"><strong>College:</strong> {profile.college}</p>
@@ -101,22 +117,26 @@ const JobSeekerProfile = () => {
             </a>
           </div>
 
-          <h2 className="text-xl font-semibold text-blue-600 mb-4">
-            Jobs You've Applied To
-          </h2>
+          <h2 className="text-xl font-semibold text-blue-600 mb-4">Jobs You've Applied To</h2>
 
           {Array.isArray(profile.jobs) && profile.jobs.length > 0 ? (
             <ul className="space-y-4">
               {profile.jobs.map((job) => (
-                <li
-                  key={job.application_id}
-                  className="p-4 border rounded-md shadow-sm bg-gray-50"
-                >
-                  <h3 className="text-lg font-semibold text-gray-800">{job.job_title}</h3>
-                  <p className="text-gray-600 mb-1">{job.job_description}</p>
-                  <span className="inline-block text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                    Role: {job.job_role}
-                  </span>
+                <li key={job.application_id} className="p-4 border rounded-md shadow-sm bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">{job.job_title}</h3>
+                      <p className="text-gray-600 mb-2">{job.job_description}</p>
+                      <span className="inline-block text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                        Role: {job.job_role}
+                      </span>
+                    </div>
+
+                    {/* Status badge */}
+                    <div className={`ml-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusBadgeClass(job.status)}`}>
+                      {humanStatus(job.status)}
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>

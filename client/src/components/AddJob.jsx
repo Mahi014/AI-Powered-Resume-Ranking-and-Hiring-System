@@ -56,71 +56,131 @@ const AddJob = () => {
       }
     }
   };
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 w-full bg-white shadow z-50 flex justify-between items-center px-6 py-3">
-        <h1 className="text-xl font-bold text-indigo-700">Employer Dashboard</h1>
-        <div className="space-x-4">
-          <button
-            onClick={() => navigate("/employer-profile")}
-            className="px-4 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            My Profile
-          </button>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
+      <header className="fixed top-0 left-0 w-full border-b border-white/5 bg-slate-950/80 backdrop-blur z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-500/30">
+              AI
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm sm:text-base">
+                Employer Dashboard
+              </span>
+              <span className="text-xs text-slate-400">
+                Create a new job opening
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate("/employer-profile")}
+              className="rounded-xl border border-blue-500/60 bg-blue-600/90 px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-md shadow-blue-500/40 hover:bg-blue-500 transition-transform hover:scale-[1.02] active:scale-95"
+            >
+              My Profile
+            </button>
+            <button
+              onClick={handleLogout}
+              className="rounded-xl border border-red-500/60 bg-red-600/90 px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-md shadow-red-500/40 hover:bg-red-500 transition-transform hover:scale-[1.02] active:scale-95"
+            >
+              Logout
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Form Content */}
-      <div className="pt-20 p-6 max-w-2xl mx-auto bg-white rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Job</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-medium">Job Title</label>
-            <input
-              type="text"
-              name="job_title"
-              value={job.job_title}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
+      <main className="flex-grow pt-24 pb-10 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto bg-slate-900/70 border border-white/10 rounded-2xl shadow-2xl shadow-blue-500/20 p-6 sm:p-8 backdrop-blur">
+          <div className="space-y-2 mb-6">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-50">
+              Add New Job
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300">
+              Define the role, responsibilities, and title. The AI engine will
+              use this job description to rank applicants.
+            </p>
           </div>
-          <div>
-            <label className="block text-gray-700 font-medium">Job Description</label>
-            <textarea
-              name="job_description"
-              value={job.job_description}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium">Job Role</label>
-            <input
-              type="text"
-              name="job_role"
-              value={job.job_role}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Post Job
-          </button>
-        </form>
-      </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Job Title */}
+            <div className="space-y-1">
+              <label
+                className="block text-xs text-slate-300"
+                htmlFor="job_title"
+              >
+                Job Title<span className="text-red-400"> *</span>
+              </label>
+              <input
+                type="text"
+                id="job_title"
+                name="job_title"
+                value={job.job_title}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Backend Engineer"
+                className="w-full text-sm bg-slate-950/80 border border-white/15 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500/70 placeholder:text-slate-500"
+              />
+            </div>
+
+            {/* Job Description */}
+            <div className="space-y-1">
+              <label
+                className="block text-xs text-slate-300"
+                htmlFor="job_description"
+              >
+                Job Description<span className="text-red-400"> *</span>
+              </label>
+              <textarea
+                id="job_description"
+                name="job_description"
+                value={job.job_description}
+                onChange={handleChange}
+                required
+                rows={5}
+                placeholder="Describe responsibilities, required skills, and experience. This text will be used for TF-IDF and skill-matching."
+                className="w-full text-sm bg-slate-950/80 border border-white/15 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500/70 placeholder:text-slate-500 resize-y"
+              />
+            </div>
+
+            {/* Job Role */}
+            <div className="space-y-1">
+              <label className="block text-xs text-slate-300" htmlFor="job_role">
+                Job Role<span className="text-red-400"> *</span>
+              </label>
+              <input
+                type="text"
+                id="job_role"
+                name="job_role"
+                value={job.job_role}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Software Development, Data Science"
+                className="w-full text-sm bg-slate-950/80 border border-white/15 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500/70 placeholder:text-slate-500"
+              />
+            </div>
+
+            <p className="text-[0.7rem] text-slate-400">
+              Tip: A clear job description with explicit skills (React, Python,
+              SQL, etc.) helps the AI rank resumes more accurately.
+            </p>
+
+            <button
+              type="submit"
+              className="group relative flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm sm:text-base font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition-transform"
+            >
+              Post Job
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                →
+              </span>
+            </button>
+          </form>
+        </div>
+      </main>
     </div>
   );
 };

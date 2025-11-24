@@ -132,14 +132,14 @@ def get_job_report(
             "resume_name", "score", "cosine_score", "skill_ratio", "matched_skills"
         ])
         # sort by rank (rank 0 at bottom), then by score desc
-        df['rank_sort'] = df['rank'].apply(lambda x: x if (x and x > 0) else 10 ** 9)
-        df = df.sort_values(by=['rank_sort', 'score'], ascending=[True, False]).drop(columns=['rank_sort'])
+        df["rank_sort"] = df["rank"].apply(lambda x: x if (x and x > 0) else 10 ** 9)
+        df = df.sort_values(by=["rank_sort", "score"], ascending=[True, False]).drop(columns=["rank_sort"])
 
         buf = io.BytesIO()
         with pd.ExcelWriter(buf, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False, sheet_name="report")
             workbook = writer.book
-            worksheet = writer.sheets['report']
+            worksheet = writer.sheets["report"]
             for i, col in enumerate(df.columns):
                 col_width = max(df[col].astype(str).map(len).max(), len(col)) + 2
                 worksheet.set_column(i, i, min(col_width, 50))
@@ -161,23 +161,28 @@ def get_job_report(
 
     rows_sorted = sorted(rows, key=sort_key)
 
-    # Build HTML table rows (escape values)
+    # Build HTML table rows with inline styles
     table_rows_html = []
+    td_base = "padding:8px 10px;border-bottom:1px solid #1f2937;font-size:12px;color:#e5e7eb;"
+    td_num = td_base + "text-align:right;font-variant-numeric:tabular-nums;"
     for r in rows_sorted:
         resume_link = f"http://localhost:5000/resume/{r['job_seeker_id']}"  # Node resume preview route
         table_rows_html.append(
             "<tr>"
-            f"<td class='num'>{html_lib.escape(str(r.get('rank', '')))}</td>"
-            f"<td>{html_lib.escape(str(r.get('job_seeker_id', '')))}</td>"
-            f"<td>{html_lib.escape(r.get('name',''))}</td>"
-            f"<td>{html_lib.escape(r.get('degree',''))}</td>"
-            f"<td>{html_lib.escape(r.get('college',''))}</td>"
-            f"<td>{html_lib.escape(str(r.get('graduation_year','')))}</td>"
-            f"<td><a href='{resume_link}' target='_blank' rel='noopener noreferrer'>{html_lib.escape(r.get('resume_name',''))}</a></td>"
-            f"<td class='num'>{'' if r.get('score') is None else format(r.get('score'), '.4f')}</td>"
-            f"<td class='num'>{'' if r.get('cosine_score') is None else format(r.get('cosine_score'), '.4f')}</td>"
-            f"<td class='num'>{'' if r.get('skill_ratio') is None else format(r.get('skill_ratio'), '.4f')}</td>"
-            f"<td>{html_lib.escape(r.get('matched_skills',''))}</td>"
+            f"<td style='{td_num}'>{html_lib.escape(str(r.get('rank', '')))}</td>"
+            f"<td style='{td_base}'>{html_lib.escape(str(r.get('job_seeker_id', '')))}</td>"
+            f"<td style='{td_base}'>{html_lib.escape(r.get('name',''))}</td>"
+            f"<td style='{td_base}'>{html_lib.escape(r.get('degree',''))}</td>"
+            f"<td style='{td_base}'>{html_lib.escape(r.get('college',''))}</td>"
+            f"<td style='{td_num}'>{html_lib.escape(str(r.get('graduation_year','')))}</td>"
+            f"<td style='{td_base}'>"
+            f"<a href='{resume_link}' target='_blank' rel='noopener noreferrer' "
+            "style='color:#38bdf8;text-decoration:none;font-weight:500;'>"
+            f"{html_lib.escape(r.get('resume_name',''))}</a></td>"
+            f"<td style='{td_num}'>{'' if r.get('score') is None else format(r.get('score'), '.4f')}</td>"
+            f"<td style='{td_num}'>{'' if r.get('cosine_score') is None else format(r.get('cosine_score'), '.4f')}</td>"
+            f"<td style='{td_num}'>{'' if r.get('skill_ratio') is None else format(r.get('skill_ratio'), '.4f')}</td>"
+            f"<td style='{td_base}'>{html_lib.escape(r.get('matched_skills',''))}</td>"
             "</tr>"
         )
 
@@ -192,60 +197,94 @@ def get_job_report(
       <meta charset="utf-8" />
       <title>Job {job_id} - Applicant Report</title>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <style>
-        body {{ font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial; margin: 18px; background:#f7fafc; color:#1f2937; }}
-        .card {{ background:white; border-radius:8px; padding:18px; box-shadow:0 6px 18px rgba(15,23,42,0.08); max-width:1200px; margin: auto; }}
-        h1 {{ margin:0 0 6px 0; font-size:20px; }}
-        .meta {{ color:#6b7280; margin-bottom:12px; }}
-        table {{ width:100%; border-collapse: collapse; font-size:13px; }}
-        th, td {{ padding:8px 10px; border-bottom:1px solid #e5e7eb; text-align:left; }}
-        th {{ background:#f3f4f6; color:#111827; position:sticky; top:0; }}
-        td.num {{ text-align:right; font-feature-settings: 'tnum'; }}
-        tr:hover td {{ background:#fffaf0; }}
-        .controls {{ display:flex; gap:8px; margin-bottom:12px; }}
-        .btn {{ display:inline-block; padding:8px 12px; border-radius:6px; background:#4f46e5; color:white; text-decoration:none; }}
-        .btn-secondary {{ background:#6b7280; }}
-        .small {{ font-size:12px; color:#6b7280; }}
-        @media (max-width:800px) {{
-          table {{ font-size:12px; }}
-          .card {{ padding:10px; }}
-        }}
-      </style>
     </head>
-    <body>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div>
-            <h1>Applicant Report — {job_title}</h1>
-            <div class="meta">Role: {job_role} &nbsp;•&nbsp; Job ID: {job_id} &nbsp;•&nbsp; Generated: {generated_at}</div>
-            <div class="small">Scoring: TF-IDF cosine + skill boost (weight = {SKILL_BOOST_WEIGHT})</div>
+    <body style="margin:0;background:#020617;background-image:radial-gradient(circle at top,#1d4ed8 0,#020617 55%,#000000 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#e5e7eb;">
+      <div style='min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;box-sizing:border-box;'>
+        <div style="width:100%;max-width:1200px;margin:16px auto;background:linear-gradient(145deg,#020617 0%,#020617 35%,#020617 100%);border-radius:18px;box-shadow:0 30px 80px rgba(15,23,42,0.9);border:1px solid rgba(148,163,184,0.35);padding:22px 20px 24px 20px;box-sizing:border-box;position:relative;overflow:hidden;">
+          
+          <!-- subtle glow accent -->
+          <div style='position:absolute;inset:auto -80px -120px auto;width:260px;height:260px;background:radial-gradient(circle,#1d4ed8 0,transparent 60%);opacity:0.25;pointer-events:none;'></div>
+
+          <!-- Header -->
+          <div style="position:relative;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;">
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="height:34px;width:34px;border-radius:9999px;background-image:linear-gradient(to bottom right,#3b82f6,#22c55e);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:white;box-shadow:0 15px 40px rgba(34,197,94,0.7);">
+                  AI
+                </div>
+                <div style="display:flex;flex-direction:column;">
+                  <span style="font-size:15px;font-weight:600;color:#f9fafb;">Applicant Report</span>
+                  <span style="font-size:11px;color:#9ca3af;">AI-powered resume ranking • TF-IDF • Skill matching</span>
+                </div>
+              </div>
+
+              <div style="margin-top:6px;">
+                <div style="font-size:19px;font-weight:600;color:#e5e7eb;margin-bottom:4px;word-break:break-word;">
+                  {job_title}
+                </div>
+                <div style="font-size:12px;color:#9ca3af;">
+                  Role:
+                  <span style="color:#e5e7eb;font-weight:500;"> {job_role}</span>
+                  <span style="color:#4b5563;"> &nbsp;•&nbsp; </span>
+                  Job ID:
+                  <span style="color:#e5e7eb;font-weight:500;"> {job_id}</span>
+                  <span style="color:#4b5563;"> &nbsp;•&nbsp; </span>
+                  Generated:
+                  <span style="color:#e5e7eb;font-weight:500;"> {generated_at}</span>
+                </div>
+                <div style="font-size:11px;color:#6b7280;margin-top:4px;">
+                  Scoring model: cosine similarity + skill boost (weight = {SKILL_BOOST_WEIGHT})
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:220px;">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;">
+                <a href="/api/jobs/{job_id}/report?download=1"
+                   style="display:inline-block;padding:8px 14px;border-radius:9999px;background-image:linear-gradient(to right,#6366f1,#22c55e);color:white;text-decoration:none;font-size:12px;font-weight:500;box-shadow:0 16px 35px rgba(79,70,229,0.7);">
+                  Download Excel
+                </a>
+                <a href="javascript:window.print()"
+                   style="display:inline-block;padding:8px 14px;border-radius:9999px;background:#020617;color:#e5e7eb;text-decoration:none;font-size:12px;font-weight:500;border:1px solid rgba(148,163,184,0.7);">
+                  Print
+                </a>
+              </div>
+              <div style="margin-top:4px;font-size:11px;color:#6b7280;text-align:right;max-width:230px;">
+                Tip: export to Excel for deeper analysis or sharing with your hiring team.
+              </div>
+            </div>
           </div>
-          <div style="text-align:right">
-            <a class="btn" href="/api/jobs/{job_id}/report?download=1">Download Excel</a>
-            <a class="btn btn-secondary" href="javascript:window.print()">Print</a>
+
+          <!-- Table container -->
+          <div style="position:relative;margin-top:4px;border-radius:14px;background:rgba(15,23,42,0.96);border:1px solid rgba(55,65,81,0.9);overflow:hidden;">
+            <div style="max-height:75vh;overflow:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                  <tr>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:right;color:#e5e7eb;font-weight:600;white-space:nowrap;">Rank</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;white-space:nowrap;">Seeker ID</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;">Name</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;">Degree</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;">College</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:right;color:#e5e7eb;font-weight:600;white-space:nowrap;">Graduation Year</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;">Resume</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:right;color:#e5e7eb;font-weight:600;white-space:nowrap;">Score</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:right;color:#e5e7eb;font-weight:600;white-space:nowrap;">Cosine</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:right;color:#e5e7eb;font-weight:600;white-space:nowrap;">Skill ratio</th>
+                    <th style="position:sticky;top:0;z-index:1;padding:8px 10px;background:#020617;border-bottom:1px solid #1f2937;text-align:left;color:#e5e7eb;font-weight:600;">Matched skills</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {"".join(table_rows_html) if table_rows_html else "<tr><td colspan='11' style='padding:14px 10px;text-align:center;color:#9ca3af;'>No applicants found.</td></tr>"}
+                </tbody>
+              </table>
+            </div>
+            <div style="padding:8px 12px;border-top:1px solid #1f2937;font-size:11px;color:#6b7280;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;background:linear-gradient(to right,#020617,#020617);">
+              <span>Ranked candidates appear first. Unranked applicants are grouped at the bottom.</span>
+              <span style="color:#4b5563;">Powered by your FastAPI resume ranking engine.</span>
+            </div>
           </div>
         </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th style="width:60px">Rank</th>
-              <th style="width:90px">Seeker ID</th>
-              <th>Name</th>
-              <th>Degree</th>
-              <th>College</th>
-              <th style="width:110px">Graduation Year</th>
-              <th>Resume</th>
-              <th style="width:90px">Score</th>
-              <th style="width:110px">Cosine</th>
-              <th style="width:100px">Skill ratio</th>
-              <th>Matched skills</th>
-            </tr>
-          </thead>
-          <tbody>
-            {"".join(table_rows_html) if table_rows_html else "<tr><td colspan='11' style='text-align:center;padding:16px'>No applicants found.</td></tr>"}
-          </tbody>
-        </table>
       </div>
     </body>
     </html>

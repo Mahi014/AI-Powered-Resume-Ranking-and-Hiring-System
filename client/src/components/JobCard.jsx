@@ -3,12 +3,12 @@ import React from "react";
 const statusBadgeClass = (status) => {
   switch ((status || "applied").toLowerCase()) {
     case "rejected":
-      return "text-red-700 bg-red-100";
+      return "text-red-300 bg-red-500/10 border border-red-500/40";
     case "selected":
-      return "text-blue-800 bg-blue-100";
+      return "text-emerald-300 bg-emerald-500/10 border border-emerald-500/40";
     case "applied":
     default:
-      return "text-green-800 bg-green-100";
+      return "text-blue-300 bg-blue-500/10 border border-blue-500/40";
   }
 };
 
@@ -20,29 +20,48 @@ const humanStatus = (status) => {
 
 const JobCard = ({ job, onApply }) => {
   return (
-    <div className="p-4 border rounded-md shadow-sm bg-gray-50">
-      <h3 className="text-lg font-semibold text-gray-800">{job.job_title}</h3>
-      <p className="text-gray-600 mb-1">{job.job_description}</p>
-      <p className="text-sm text-gray-500 mb-2">Company: {job.company}</p>
-      <span className="inline-block text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded mr-4">
-        Role: {job.job_role}
-      </span>
-
-      {job.applied ? (
-        <div className="inline-flex items-center gap-2">
-          <span className={`ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusBadgeClass(job.status)}`}>
-            {humanStatus(job.status)}
+    <div className="rounded-xl border border-white/10 bg-slate-950/70 p-4 sm:p-5 shadow-md shadow-slate-950/60 flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="space-y-1.5">
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-50">
+            {job.job_title}
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-300">
+            {job.job_description}
+          </p>
+          <p className="text-xs sm:text-sm text-slate-400">
+            Company:{" "}
+            <span className="text-slate-100 font-medium">{job.company}</span>
+          </p>
+          <span className="inline-flex items-center text-xs sm:text-sm text-slate-200 bg-slate-800/80 px-2.5 py-1 rounded-full">
+            Role: <span className="ml-1 font-medium">{job.job_role}</span>
           </span>
-          <span className="text-gray-500 text-sm"> (Application submitted)</span>
         </div>
-      ) : (
-        <button
-          onClick={() => onApply(job.job_id)}
-          className="ml-4 px-4 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
-        >
-          Apply
-        </button>
-      )}
+
+        <div className="flex flex-col items-start sm:items-end gap-2">
+          {job.applied ? (
+            <div className="inline-flex items-center gap-2">
+              <span
+                className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium ${statusBadgeClass(
+                  job.status
+                )}`}
+              >
+                {humanStatus(job.status)}
+              </span>
+              <span className="text-[0.7rem] sm:text-xs text-slate-400">
+                Application submitted
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={() => onApply(job.job_id)}
+              className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-md shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-transform"
+            >
+              Apply
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

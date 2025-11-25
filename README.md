@@ -1,38 +1,139 @@
-# AI-Powered-Resume-Ranking-and-Hiring-System
+# AI-Powered Resume Ranking and Hiring System
 
-A full-stack web application that streamlines the hiring workflow for employers and job seekers.
-Employers can post jobs, view applicants, and evaluate them efficiently. Job seekers can create profiles, upload resumes, and apply to posted opportunities.
-The system now includes a resume ranking engine built using FastAPI, NLP, TF-IDF, cosine similarity, and skill-matching.
+A full-stack recruitment platform that streamlines hiring for both job seekers and employers. 
+Job seekers can upload resumes, create profiles, and apply for job postings. Employers can 
+create job postings, view all job applicants, and run an AI-based ranking system that ranks 
+resumes using TF-IDF, Cosine Similarity, and Skill Matching through a FastAPI engine.
 
-## Tech Stack
+------------------------------------------------------------
+🚀 FEATURES
+------------------------------------------------------------
 
-- **Frontend:** React, Tailwind CSS  
-- **Backend:** Express.js for authentication, job management, and resume storage; FastAPI for AI-based resume ranking and report generation  
-- **Database:** PostgreSQL
+JOB SEEKER FEATURES:
+- Create job seeker profile
+- Upload resume (PDF/DOCX)
+- Apply to jobs (resume auto-attached)
+- View job listings
 
-## System Capabilities
+EMPLOYER FEATURES:
+- Create employer profile
+- Post new job openings
+- View list of applicants
+- Separate views: Unranked Applicants and Ranked Applicants
+- Open resumes inside browser
+- Download HTML-based report preview
+- Download Excel-based ranking report
 
-### Job Seeker
-- Create profile  
-- Upload resume (PDF/DOCX)  
-- Apply to jobs with auto-attached resume  
+AI ENGINE FEATURES:
+- Extracts text from PDF/DOCX resumes
+- Preprocesses text: lowercase, tokenization, stopword removal, lemmatization
+- Creates TF-IDF vectors (uses 1–2 gram range)
+- Calculates cosine similarity between job description and resumes
+- Automatically extracts skills from job description
+- Computes skill-match ratio for each resume
+- Combines both metrics into a weighted final score
 
-### Employer
-- Create company profile  
-- Post new job openings  
-- View applicant list with ranked + unranked separation  
-- Open applicant resumes directly in the browser  
-- Generate HTML or Excel-based reports  
+FINAL SCORE FORMULA:
+final_score = (1 - w) * cosine_similarity + w * skill_match_ratio
 
-### AI-Powered Resume Ranking
-- Extracts text from PDF/DOCX resumes  
-- Preprocesses using tokenization, stopword removal, and lemmatization  
-- Converts the Job Description (JD) and resumes into TF-IDF vectors (1–2 gram range)  
-- Calculates cosine similarity between JD and resumes  
-- Performs automatic skill extraction from the JD  
-- Computes a final weighted score:  
-  **final_score = (1 − w) × cosine_similarity + w × skill_match_ratio**  
-- Automatically updates applicant ranks inside PostgreSQL  
-- Supports **HTML-based report preview** (opens in a new tab) and **Excel report download**
+- Updates ranking values directly inside PostgreSQL
+- Generates downloadable reports (HTML and Excel)
 
+------------------------------------------------------------
+🏛️ SYSTEM ARCHITECTURE
+------------------------------------------------------------
 
+FRONTEND (React + Tailwind CSS):
+- Provides UI for both job seekers and employers
+- Handles login, dashboards, job search, job posting, and viewing applicant resumes
+- Communicates with both Express.js and FastAPI servers
+
+EXPRESS.JS MAIN BACKEND:
+- Handles authentication
+- Manages job postings
+- Manages resume uploads
+- Stores resumes as BYTEA in PostgreSQL
+- Provides applicant lists for employers
+
+FASTAPI RANKING BACKEND:
+- Performs resume text extraction
+- NLP preprocessing
+- TF-IDF vectorization
+- Cosine similarity calculation
+- Skill extraction and matching
+- Final weighted ranking
+- Writes updated rankings back into PostgreSQL
+- Generates HTML & Excel reports
+
+POSTGRESQL DATABASE:
+- Stores login, job seekers, employers, job postings, applications, and rankings
+- Stores resumes using BYTEA format internally
+
+------------------------------------------------------------
+▶️ HOW TO RUN THE PROJECT
+------------------------------------------------------------
+
+1) START REACT FRONTEND:
+cd client
+npm install
+npm start
+
+2) START MAIN EXPRESS SERVER:
+cd main_server
+npm install
+node server.js
+
+3) START FASTAPI RANKING SERVER:
+cd ranking_server
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+------------------------------------------------------------
+🖼️ FULL SCREENSHOTS (13 IMAGES)
+------------------------------------------------------------
+
+Below are ALL screenshots included in the project:
+
+![Screenshot1 – Login Page](output/Screenshot1.png)
+
+![Screenshot2 – Role Selection](output/Screenshot2.png)
+
+![Screenshot3 – Job Seeker Registration](output/Screenshot3.png)
+
+![Screenshot4 – Job Seeker Dashboard](output/Screenshot4.png)
+
+![Screenshot5 – Job Search Interface](output/Screenshot5.png)
+
+![Screenshot6 – Employer Registration](output/Screenshot6.png)
+
+![Screenshot7 – Employer Dashboard](output/Screenshot7.png)
+
+![Screenshot8 – Job Creation](output/Screenshot8.png)
+
+![Screenshot9 – Applicant Management](output/Screenshot9.png)
+
+![Screenshot10 – Unranked Applications](output/Screenshot10.png)
+
+![Screenshot11 – Ranking Progress](output/Screenshot11.png)
+
+![Screenshot12 – Ranked Results](output/Screenshot12.png)
+
+![Screenshot13 – Analytics Dashboard](output/Screenshot13.png)
+
+------------------------------------------------------------
+🔮 FUTURE IMPROVEMENTS
+------------------------------------------------------------
+
+- Integration with semantic models like BERT / Sentence-BERT
+- Lower false-negative skill detection using fuzzy matching
+- Add OCR support for scanned PDF resumes
+- Deploy as Dockerized microservices
+- Add ATS-style candidate tracking
+- Multi-language resume support
+- Add recruiter analytics (graphs and visual insights)
+
+------------------------------------------------------------
+👨‍💻 AUTHOR
+------------------------------------------------------------
+
+Mahender Singh

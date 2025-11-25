@@ -96,8 +96,6 @@ uvicorn app.main:app --reload
 🖼️ SCREENSHOTS
 ------------------------------------------------------------
 
-# Below are ALL screenshots included in the project:
-
 ## Login Page
 ![Screenshot1 – Login Page](output/Screenshot1.png)
 
@@ -154,5 +152,6 @@ uvicorn app.main:app --reload
 ------------------------------------------------------------
 
 Mahender Singh
+
 
 

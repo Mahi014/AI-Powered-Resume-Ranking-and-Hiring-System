@@ -74,19 +74,23 @@ POSTGRESQL DATABASE:
 ------------------------------------------------------------
 
 1) START REACT FRONTEND:
+```bash
 cd client
 npm install
 npm start
-
+```
 2) START MAIN EXPRESS SERVER:
-cd main_server
+```bash
+cd server
 npm install
 node server.js
-
+```
 3) START FASTAPI RANKING SERVER:
+```bash
 cd ranking_server
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
 
 ------------------------------------------------------------
 🖼️ FULL SCREENSHOTS (13 IMAGES)
@@ -137,3 +141,4 @@ Below are ALL screenshots included in the project:
 ------------------------------------------------------------
 
 Mahender Singh
+

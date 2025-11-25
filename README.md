@@ -93,35 +93,48 @@ uvicorn app.main:app --reload
 ```
 
 ------------------------------------------------------------
-🖼️ FULL SCREENSHOTS (13 IMAGES)
+🖼️ SCREENSHOTS
 ------------------------------------------------------------
 
-Below are ALL screenshots included in the project:
+# Below are ALL screenshots included in the project:
 
+## Login Page
 ![Screenshot1 – Login Page](output/Screenshot1.png)
 
+## Role Selection
 ![Screenshot2 – Role Selection](output/Screenshot2.png)
 
+## Job Seeker Registration
 ![Screenshot3 – Job Seeker Registration](output/Screenshot3.png)
 
+## Job Seeker Dashboard
 ![Screenshot4 – Job Seeker Dashboard](output/Screenshot4.png)
 
+## Job Search Interface
 ![Screenshot5 – Job Search Interface](output/Screenshot5.png)
 
+## Employer Registration
 ![Screenshot6 – Employer Registration](output/Screenshot6.png)
 
+## Employer Dashboard
 ![Screenshot7 – Employer Dashboard](output/Screenshot7.png)
 
+## Job Creation
 ![Screenshot8 – Job Creation](output/Screenshot8.png)
 
+## Applicant Management
 ![Screenshot9 – Applicant Management](output/Screenshot9.png)
 
+## Unranked Applications
 ![Screenshot10 – Unranked Applications](output/Screenshot10.png)
 
+## Ranking Progress
 ![Screenshot11 – Ranking Progress](output/Screenshot11.png)
 
+## Ranked Results
 ![Screenshot12 – Ranked Results](output/Screenshot12.png)
 
+## Analytics Dashboard
 ![Screenshot13 – Analytics Dashboard](output/Screenshot13.png)
 
 ------------------------------------------------------------
@@ -141,4 +154,5 @@ Below are ALL screenshots included in the project:
 ------------------------------------------------------------
 
 Mahender Singh
+
 
